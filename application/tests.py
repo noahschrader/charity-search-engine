@@ -1,6 +1,6 @@
 from django.test import TestCase
 import requests
-from FEMA import ApiHandler, ApiData
+from FEMA import ApiHandler, DisasterQuery
 
 
 class CharityNavigatorApi(TestCase):
@@ -13,8 +13,6 @@ class CharityNavigatorApi(TestCase):
 
 class FemaApi(TestCase):
     def test(self):
-        e = "DisasterDeclarationsSummaries"
-        v = "V2"
         handler = ApiHandler()
-        data = handler.query(v, e)
-        print(data.get_data())
+        query = DisasterQuery()
+        handler.query(query)
