@@ -1,5 +1,6 @@
 from django.test import TestCase
 import requests
+from FEMA import ApiHandler, ApiData
 
 
 class CharityNavigatorApi(TestCase):
@@ -8,3 +9,12 @@ class CharityNavigatorApi(TestCase):
         response = requests.get('https://api.data.charitynavigator.org/v2/Organizations', query)
         data = response.json()
         self.assertTrue(data)
+
+
+class FemaApi(TestCase):
+    def test(self):
+        e = "DisasterDeclarationsSummaries"
+        v = "V2"
+        handler = ApiHandler()
+        data = handler.query(v, e)
+        print(data.get_data())
