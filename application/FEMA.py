@@ -18,31 +18,12 @@ YYYY-MM-DDTHH:MM:SS.mmmz
 
 import requests
 import abc
-
-
-class DisasterData:
-    def __init__(self, title, incident_type, declaration_date):
-        self.title = title
-        self.declaration_date = declaration_date
-        self.incident_type = incident_type
-        pass
-
-    def get_title(self):
-        return self.title
-
-    def get_declaration_date(self):
-        return self.declaration_date
-
-    def get_incident_type(self):
-        return self.incident_type
-
-    def __str__(self):
-        return "DisasterData=[title=" + str(self.title) + ",incident type=" + str(self.incident_type) + ",declarationDate=" + str(self.declaration_date) + "] "
+from datetime import datetime
 
 
 # Query entities and versions found at https://www.fema.gov/about/openfema/data-sets.
 class ApiQuery(abc.ABC):
-    BASE_URI = "https://www.fema.gov/api/open"
+    BASE_API_URI = "https://www.fema.gov/api/open"
 
     @abc.abstractmethod
     def get_version(self):
@@ -53,39 +34,100 @@ class ApiQuery(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def handler_response(self, json):
+    def handle_api_response(self, json):
+        pass
+
+    @abc.abstractmethod
+    def build_query_string(self):
         pass
 
 
 class DisasterQuery(ApiQuery):
 
-    def __init__(self, start_year):
-        self.start_year = start_year
+    class Field:
+        DECLARATION_TYPE = "declarationType"
+        DECLARATION_TITLE = "declarationTitle"
+        INCIDENT_BEGIN_DATE = "incidentBeginDate"
+
+    class DeclarationType:
+        EMERGENCY = "EM"
+        FIRE_MANAGEMENT = "FM"
+        MAJOR_DISASTER = "DR"
+
+    def __init__(self, declaration_type: DeclarationType = None, start_date: datetime = None):
+
+        """
+        :param declaration_type: Queries disasters that are of a specific type. Different types are defined in
+                                 DisasterQuery.DeclarationType.
+        :param start_date: Filters the query to disasters that occurred after a given datetime.
+        """
+
+        self.declaration_type = declaration_type
+        self.start_date = start_date
 
     def get_version(self):
         return "v2"
 
     def get_entity_name(self):
-        return "DisasterDeclarationsSummaries?$filter=declarationDate gt " + "'" + str(self.start_year) + "-01-01T04" \
-                                                                                                          ":00:00.000z'"
+        return "DisasterDeclarationsSummaries"
 
-    def handler_response(self, json):
+    def handle_api_response(self, json):
+
+        """
+        Handles a response from a query of this ApiQuery.
+        :param json: The JSON response given by a FEMA API endpoint.
+        :return: A set of JSON disaster summaries which can be accessed using this classes Fields.
+        """
+
         disasters = json["DisasterDeclarationsSummaries"]
-        data = []
-        for disaster in disasters:
-            data.append(DisasterData(disaster["declarationTitle"], disaster["incidentType"], disaster["declarationDate"]))
-        return data
+        return disasters
 
+    def build_query_string(self):
+        query_str = self.BASE_API_URI + "/" + self.get_version() + "/" + self.get_entity_name()
+        if self.start_date is not None:
+            date_filter_str = self.generate_date_filter_str(self.start_date)
+            query_str = self.add_filter_to_query(query_str, date_filter_str)
+        if self.declaration_type is not None:
+            declaration_type_filter_str = self.generate_declaration_type_filter_str(self.declaration_type)
+            query_str = self.add_filter_to_query(query_str, declaration_type_filter_str)
+        print("built query string: " + query_str)
+        return query_str
+
+    def add_filter_to_query(self, query_str, filter_str) -> str:
+        updated_query_str = query_str
+        if not self.filter_present(updated_query_str):
+            updated_query_str += "?$filter="
+        else:
+            updated_query_str += " and "
+        updated_query_str += filter_str
+        return updated_query_str
+
+    def filter_present(self, query_str) -> bool:
+        if "$filter=" in query_str:
+            return True
+        return False
+
+    def generate_date_filter_str(self, date: datetime) -> str:
+        date_filter = "incidentBeginDate gt '" + str(date) + "'"
+        return date_filter
+
+    def generate_declaration_type_filter_str(self, declaration_type : DeclarationType):
+        type_filter = "declarationType eq '{declaration_type}'".format(declaration_type=declaration_type)
+        return type_filter
 
 class ApiHandler:
 
     def query(self, query: ApiQuery):
+
+        """
+        Queries the FEMA API using the given ApiQuery object.
+
+        :returns: the result of query's handler_api_response() call
+        """
+
         if not isinstance(query, ApiQuery):
             raise TypeError("query is not a subclass of ApiQuery")
-        query_string = self.__build_query_string(query)
-        r = requests.get(query_string)
-        data = r.json()
-        return query.handler_response(data)
-
-    def __build_query_string(self, query):
-        return query.BASE_URI + "/" + query.get_version() + "/" + query.get_entity_name()
+        query_string = query.build_query_string()
+        response = requests.get(query_string)
+        json_data = response.json()
+        return query.handle_api_response(json_data)

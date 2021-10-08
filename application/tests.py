@@ -1,6 +1,7 @@
 from django.test import TestCase
 import requests
 from FEMA import ApiHandler, DisasterQuery
+from datetime import datetime
 
 
 class CharityNavigatorApi(TestCase):
@@ -12,9 +13,27 @@ class CharityNavigatorApi(TestCase):
 
 
 class FemaApi(TestCase):
+
+    def setUp(self) -> None:
+        self.handler = ApiHandler()
+
+    def test_something_is_created_on_creation(self):
+        query = DisasterQuery()
+        self.assertIsNotNone(query)
+
     def test(self):
-        handler = ApiHandler()
-        query = DisasterQuery(2021)
-        data = handler.query(query)
-        for stuff in data:
-            print(stuff)
+        start_date = datetime(2021, 8, 1)
+        type = DisasterQuery.DeclarationType.EMERGENCY
+        query = DisasterQuery(type, start_date)
+        data = self.handler.query(query)
+        for disaster in data:
+            print(
+                "[" +
+                disaster[DisasterQuery.Field.DECLARATION_TITLE] +
+                ", " +
+                disaster[DisasterQuery.Field.DECLARATION_TYPE] +
+                ", " +
+                disaster[DisasterQuery.Field.INCIDENT_BEGIN_DATE] +
+                "]"
+            )
+
