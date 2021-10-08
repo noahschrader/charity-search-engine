@@ -14,5 +14,7 @@ class CharityNavigatorApi(TestCase):
 class FemaApi(TestCase):
     def test(self):
         handler = ApiHandler()
-        query = DisasterQuery()
-        handler.query(query)
+        query = DisasterQuery(2021)
+        data = handler.query(query)
+        for stuff in data:
+            print(stuff)

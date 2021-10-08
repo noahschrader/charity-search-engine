@@ -9,7 +9,11 @@ Potential Disaster fields of interest for charities:
 - incidentType
 -
 
-DataSet -> ApiHandler -> List<
+DataSet -> ApiHandler -> List
+
+FEMA time format:
+YYYY-MM-DDTHH:MM:SS.mmmz
+
 """
 
 import requests
@@ -17,10 +21,10 @@ import abc
 
 
 class DisasterData:
-    def __init__(self, disaster_json):
-        self.title = ""
-        self.declaration_date = ""
-        self.incident_type = ""
+    def __init__(self, title, incident_type, declaration_date):
+        self.title = title
+        self.declaration_date = declaration_date
+        self.incident_type = incident_type
         pass
 
     def get_title(self):
@@ -31,6 +35,9 @@ class DisasterData:
 
     def get_incident_type(self):
         return self.incident_type
+
+    def __str__(self):
+        return "DisasterData=[title=" + str(self.title) + ",incident type=" + str(self.incident_type) + ",declarationDate=" + str(self.declaration_date) + "] "
 
 
 # Query entities and versions found at https://www.fema.gov/about/openfema/data-sets.
@@ -45,14 +52,29 @@ class ApiQuery(abc.ABC):
     def get_entity_name(self):
         pass
 
+    @abc.abstractmethod
+    def handler_response(self, json):
+        pass
+
 
 class DisasterQuery(ApiQuery):
+
+    def __init__(self, start_year):
+        self.start_year = start_year
 
     def get_version(self):
         return "v2"
 
     def get_entity_name(self):
-        return "DisasterDeclarationsSummaries"
+        return "DisasterDeclarationsSummaries?$filter=declarationDate gt " + "'" + str(self.start_year) + "-01-01T04" \
+                                                                                                          ":00:00.000z'"
+
+    def handler_response(self, json):
+        disasters = json["DisasterDeclarationsSummaries"]
+        data = []
+        for disaster in disasters:
+            data.append(DisasterData(disaster["declarationTitle"], disaster["incidentType"], disaster["declarationDate"]))
+        return data
 
 
 class ApiHandler:
@@ -63,7 +85,7 @@ class ApiHandler:
         query_string = self.__build_query_string(query)
         r = requests.get(query_string)
         data = r.json()
-        print(data)
+        return query.handler_response(data)
 
     def __build_query_string(self, query):
         return query.BASE_URI + "/" + query.get_version() + "/" + query.get_entity_name()
