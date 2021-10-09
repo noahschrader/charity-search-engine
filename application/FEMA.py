@@ -115,6 +115,7 @@ class DisasterQuery(ApiQuery):
         type_filter = "declarationType eq '{declaration_type}'".format(declaration_type=declaration_type)
         return type_filter
 
+
 class ApiHandler:
 
     def query(self, query: ApiQuery):

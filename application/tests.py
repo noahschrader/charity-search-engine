@@ -1,6 +1,7 @@
 from django.test import TestCase
+from unittest.mock import Mock, patch # May need these for external API testing.
 import requests
-from FEMA import ApiHandler, DisasterQuery
+from FEMA import ApiHandler, DisasterQuery, ApiQuery
 from datetime import datetime
 
 
@@ -12,16 +13,51 @@ class CharityNavigatorApi(TestCase):
         self.assertTrue(data)
 
 
+class TestApiHandler(TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.handler = ApiHandler()
+
+    def test_init(self):
+        self.assertIsNotNone(self.handler)
+
+    def test_empty_query(self):
+        with self.assertRaises(TypeError):
+            self.handler.query()
+
+    def test_bad_query_arg(self):
+        with self.assertRaises(TypeError):
+            self.handler.query(0)
+
+    class TestQuery(ApiQuery):
+        def get_version(self):
+            pass
+
+        def get_entity_name(self):
+            pass
+
+        def handle_api_response(self, json):
+            pass
+
+        def build_query_string(self):
+            pass
+
+    def test(self):
+        pass
+
+
 class FemaApi(TestCase):
 
     def setUp(self) -> None:
+        super().setUp()
         self.handler = ApiHandler()
 
     def test_something_is_created_on_creation(self):
         query = DisasterQuery()
         self.assertIsNotNone(query)
 
-    def test(self):
+    def test_demo(self):
         start_date = datetime(2021, 8, 1)
         type = DisasterQuery.DeclarationType.EMERGENCY
         query = DisasterQuery(type, start_date)
