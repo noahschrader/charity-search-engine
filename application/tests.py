@@ -15,6 +15,20 @@ class CharityNavigatorApi(TestCase):
 
 class TestApiHandler(TestCase):
 
+    class TestQuery(ApiQuery):
+
+        def get_version(self):
+            pass
+
+        def get_entity_name(self):
+            pass
+
+        def handle_api_response(self, json):
+            pass
+
+        def build_query_string(self):
+            pass
+
     def setUp(self) -> None:
         super().setUp()
         self.handler = ApiHandler()
@@ -30,21 +44,12 @@ class TestApiHandler(TestCase):
         with self.assertRaises(TypeError):
             self.handler.query(0)
 
-    class TestQuery(ApiQuery):
-        def get_version(self):
-            pass
+    def test_blank_build_query_string(self):
 
-        def get_entity_name(self):
-            pass
-
-        def handle_api_response(self, json):
-            pass
-
-        def build_query_string(self):
-            pass
-
-    def test(self):
-        pass
+        # This lets us choose the return value of build_query_String() to test when different urls are used.
+        with patch.object(TestApiHandler.TestQuery, 'build_query_string', return_value="") as mock_method:
+            with self.assertRaises(requests.exceptions.MissingSchema):
+                self.handler.query(self.TestQuery())
 
 
 class FemaApi(TestCase):

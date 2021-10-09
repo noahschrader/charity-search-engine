@@ -123,12 +123,14 @@ class ApiHandler:
         """
         Queries the FEMA API using the given ApiQuery object.
 
-        :returns: the result of query's handler_api_response() call
+        :returns: the result of query's handler_api_response() call or None if a response was not recieved.
         """
 
         if not isinstance(query, ApiQuery):
             raise TypeError("query is not a subclass of ApiQuery")
         query_string = query.build_query_string()
         response = requests.get(query_string)
+        if not response.ok:
+            return None
         json_data = response.json()
         return query.handle_api_response(json_data)
