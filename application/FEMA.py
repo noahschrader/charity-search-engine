@@ -21,9 +21,50 @@ import abc
 from datetime import datetime
 
 
+class Filter(abc.ABC):
+
+    COMMAND_STRING = "$filter"
+
+    class LogicalOperator:
+        EQUAL = "eq"
+        NOT_EQUAL = "ne"
+        GREATER_THAN = "gt"
+        GREATER_THAN_OR_EQUAL = "ge"
+        LESS_THAN = "lt"
+        LESS_THAN_OR_EQUAL = "le"
+        AND = "and"
+        OR = "or"
+        NOT = "not"
+
+    @abc.abstractmethod
+    def build_filter_string(self) -> str:
+        pass
+
+
+class DateFilter(Filter):
+
+    DATA_FIELD = "incidentBeginDate"
+
+    def __init__(self, operator: Filter.LogicalOperator, date: datetime):
+        self.operator = operator
+        self.date = date
+
+    def build_filter_string(self) -> str:
+        return "{} {} '{}'".format(self.DATA_FIELD, self.operator, self.date)
+
+    def get_operator(self) -> Filter.LogicalOperator:
+        return self.operator
+
+    def get_date(self) -> datetime:
+        return self.date
+
+
 # Query entities and versions found at https://www.fema.gov/about/openfema/data-sets.
 class ApiQuery(abc.ABC):
+
     BASE_API_URI = "https://www.fema.gov/api/open"
+    PATH_QUERY_SEPARATOR = "?"
+    QUERY_ASSIGNMENT_OPERATOR = "="
 
     @abc.abstractmethod
     def get_version(self):
@@ -34,15 +75,22 @@ class ApiQuery(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def handle_api_response(self, json):
+    def handle_json_api_response(self, json: str):
         pass
 
     @abc.abstractmethod
     def build_query_string(self):
         pass
 
+    @abc.abstractmethod
+    def add_filter(self, filter: Filter):
+        pass
+
 
 class DisasterQuery(ApiQuery):
+
+    VERSION = "v2"
+    ENTITY_NAME = "DisasterDeclarationsSummaries"
 
     class Field:
         DECLARATION_TYPE = "declarationType"
@@ -66,12 +114,12 @@ class DisasterQuery(ApiQuery):
         self.start_date = start_date
 
     def get_version(self):
-        return "v2"
+        return self.VERSION
 
     def get_entity_name(self):
         return "DisasterDeclarationsSummaries"
 
-    def handle_api_response(self, json):
+    def handle_json_api_response(self, json: str):
 
         """
         Handles a response from a query of this ApiQuery.
@@ -93,16 +141,16 @@ class DisasterQuery(ApiQuery):
         print("built query string: " + query_str)
         return query_str
 
-    def add_filter_to_query(self, query_str, filter_str) -> str:
+    def add_filter_to_query(self, query_str: str, filter_str: str) -> str:
         updated_query_str = query_str
         if not self.filter_present(updated_query_str):
-            updated_query_str += "?$filter="
+            updated_query_str += self.PATH_QUERY_SEPARATOR + "$filter" + self.QUERY_ASSIGNMENT_OPERATOR
         else:
             updated_query_str += " and "
         updated_query_str += filter_str
         return updated_query_str
 
-    def filter_present(self, query_str) -> bool:
+    def filter_present(self, query_str: str) -> bool:
         if "$filter=" in query_str:
             return True
         return False
@@ -114,6 +162,10 @@ class DisasterQuery(ApiQuery):
     def generate_declaration_type_filter_str(self, declaration_type : DeclarationType):
         type_filter = "declarationType eq '{declaration_type}'".format(declaration_type=declaration_type)
         return type_filter
+
+    def add_filter(self, filter: Filter):
+        pass
+
 
 
 class ApiHandler:
@@ -133,4 +185,4 @@ class ApiHandler:
         if not response.ok:
             return None
         json_data = response.json()
-        return query.handle_api_response(json_data)
+        return query.handle_json_api_response(json_data)

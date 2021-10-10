@@ -1,7 +1,7 @@
 from django.test import TestCase
-from unittest.mock import Mock, patch # May need these for external API testing.
+from unittest.mock import patch # May need these for external API testing.
 import requests
-from FEMA import ApiHandler, DisasterQuery, ApiQuery
+from FEMA import ApiHandler, DisasterQuery, ApiQuery, DateFilter, Filter
 from datetime import datetime
 
 
@@ -15,6 +15,7 @@ class CharityNavigatorApi(TestCase):
 
 class TestApiHandler(TestCase):
 
+    # Methods of this class should be patched as needed.
     class TestQuery(ApiQuery):
 
         def get_version(self):
@@ -23,10 +24,13 @@ class TestApiHandler(TestCase):
         def get_entity_name(self):
             pass
 
-        def handle_api_response(self, json):
+        def handle_json_api_response(self, json):
             pass
 
         def build_query_string(self):
+            pass
+
+        def add_filter(self, filter: Filter):
             pass
 
     def setUp(self) -> None:
@@ -52,29 +56,69 @@ class TestApiHandler(TestCase):
                 self.handler.query(self.TestQuery())
 
 
+class TestDisasterQuery(TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.disaster_query = DisasterQuery()
+
+    def test_preset_version_and_entity_name(self):
+        self.assertEqual(self.disaster_query.get_version(), self.disaster_query.VERSION)
+        self.assertEqual(self.disaster_query.get_entity_name(), self.disaster_query.ENTITY_NAME)
+
+    def test_basic_query_string(self):
+        expected_query_string = self.disaster_query.BASE_API_URI +\
+                                "/" + self.disaster_query.VERSION +\
+                                "/" + self.disaster_query.ENTITY_NAME
+        self.assertEqual(self.disaster_query.build_query_string(), expected_query_string)
+
+    def test_single_filtered_query_string(self):
+        filter = DateFilter(DateFilter.LogicalOperator.GREATER_THAN, datetime(2021, 8, 1))
+        self.disaster_query.add_filter(filter)
+        expected_query_string = "{}/{}/{}{}{}{}{}".format(ApiQuery.BASE_API_URI,
+                                                          DisasterQuery.VERSION,
+                                                          DisasterQuery.ENTITY_NAME,
+                                                          ApiQuery.PATH_QUERY_SEPARATOR,
+                                                          Filter.COMMAND_STRING,
+                                                          ApiQuery.QUERY_ASSIGNMENT_OPERATOR,
+                                                          filter.build_filter_string())
+        self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
+
+
+class TestDateFilter(TestCase):
+
+    def test_getters(self):
+        o = DateFilter.LogicalOperator.EQUAL
+        d = datetime(2000, 1, 1)
+        df = DateFilter(o, d)
+        self.assertEqual(df.get_operator(), o)
+        self.assertEqual(df.get_date(), d)
+
+    def test_build_string(self):
+        date_filter = DateFilter(DateFilter.LogicalOperator.GREATER_THAN, datetime(2021, 8, 1))
+        expected_string = "{} {} '{}'".format(date_filter.DATA_FIELD, date_filter.get_operator(), date_filter.get_date())
+        self.assertEqual(date_filter.build_filter_string(), expected_string)
+
+
 class FemaApi(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
         self.handler = ApiHandler()
 
-    def test_something_is_created_on_creation(self):
-        query = DisasterQuery()
-        self.assertIsNotNone(query)
-
-    def test_demo(self):
-        start_date = datetime(2021, 8, 1)
-        type = DisasterQuery.DeclarationType.EMERGENCY
-        query = DisasterQuery(type, start_date)
-        data = self.handler.query(query)
-        for disaster in data:
-            print(
-                "[" +
-                disaster[DisasterQuery.Field.DECLARATION_TITLE] +
-                ", " +
-                disaster[DisasterQuery.Field.DECLARATION_TYPE] +
-                ", " +
-                disaster[DisasterQuery.Field.INCIDENT_BEGIN_DATE] +
-                "]"
-            )
+    # def test_demo(self):
+    #     start_date = datetime(2021, 8, 1)
+    #     type = DisasterQuery.DeclarationType.EMERGENCY
+    #     query = DisasterQuery(type, start_date)
+    #     data = self.handler.query(query)
+    #     for disaster in data:
+    #         print(
+    #             "[" +
+    #             disaster[DisasterQuery.Field.DECLARATION_TITLE] +
+    #             ", " +
+    #             disaster[DisasterQuery.Field.DECLARATION_TYPE] +
+    #             ", " +
+    #             disaster[DisasterQuery.Field.INCIDENT_BEGIN_DATE] +
+    #             "]"
+    #         )
 
