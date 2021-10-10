@@ -4,7 +4,7 @@ app_id = '998e64be'
 app_key = 'c99ca3e66a3f61b839486371709a0cd4'
 
 base_url = 'https://api.data.charitynavigator.org/v2'
-base_query = {'app_id': app_id, 'app_key': app_key, 'pageSize': 1000, 'pageNum': 1}
+base_query = {'app_id': app_id, 'app_key': app_key, 'pageSize': 1000, 'pageNum': 1, 'searchType': 'NAME_ONLY'}
 
 
 def get_organizations(query):
