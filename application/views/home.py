@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 from application.api.charity_navigator import get_organizations
 
@@ -8,5 +9,4 @@ class Home(View):
         return render(request, "main/home.html")
 
     def post(self, request):
-        charities = get_organizations({'search': request.POST['search']})
-        return render(request, "main/search.html", {'search': request.POST['search'], 'charities': charities})
+        return redirect("/search?q=" + request.POST['search'])
