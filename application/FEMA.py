@@ -15,6 +15,8 @@ FEMA time format:
 YYYY-MM-DDTHH:MM:SS.mmmz
 
 """
+from enum import Enum
+from typing import Final
 
 import requests
 import abc
@@ -23,9 +25,9 @@ from datetime import datetime
 
 class Filter(abc.ABC):
 
-    COMMAND_STRING = "$filter"
+    COMMAND_STRING: Final = "$filter"
 
-    class LogicalOperator:
+    class LogicalOperator(Enum):
         EQUAL = "eq"
         NOT_EQUAL = "ne"
         GREATER_THAN = "gt"
@@ -43,7 +45,7 @@ class Filter(abc.ABC):
 
 class DateFilter(Filter):
 
-    DATA_FIELD = "incidentBeginDate"
+    DATA_FIELD: Final = "incidentBeginDate"
 
     def __init__(self, operator: Filter.LogicalOperator, date: datetime):
         self.operator = operator
@@ -62,9 +64,9 @@ class DateFilter(Filter):
 # Query entities and versions found at https://www.fema.gov/about/openfema/data-sets.
 class ApiQuery(abc.ABC):
 
-    BASE_API_URI = "https://www.fema.gov/api/open"
-    PATH_QUERY_SEPARATOR = "?"
-    QUERY_ASSIGNMENT_OPERATOR = "="
+    BASE_API_URI: Final = "https://www.fema.gov/api/open"
+    PATH_QUERY_SEPARATOR: Final = "?"
+    QUERY_ASSIGNMENT_OPERATOR: Final = "="
 
     @abc.abstractmethod
     def get_version(self):
@@ -89,29 +91,17 @@ class ApiQuery(abc.ABC):
 
 class DisasterQuery(ApiQuery):
 
-    VERSION = "v2"
-    ENTITY_NAME = "DisasterDeclarationsSummaries"
+    VERSION: Final = "v2"
+    ENTITY_NAME: Final = "DisasterDeclarationsSummaries"
 
-    class Field:
+    class Field(Enum):
         DECLARATION_TYPE = "declarationType"
         DECLARATION_TITLE = "declarationTitle"
         INCIDENT_BEGIN_DATE = "incidentBeginDate"
 
-    class DeclarationType:
-        EMERGENCY = "EM"
-        FIRE_MANAGEMENT = "FM"
-        MAJOR_DISASTER = "DR"
-
-    def __init__(self, declaration_type: DeclarationType = None, start_date: datetime = None):
-
-        """
-        :param declaration_type: Queries disasters that are of a specific type. Different types are defined in
-                                 DisasterQuery.DeclarationType.
-        :param start_date: Filters the query to disasters that occurred after a given datetime.
-        """
-
-        self.declaration_type = declaration_type
-        self.start_date = start_date
+    def __init__(self):
+        super()
+        self.filters = []
 
     def get_version(self):
         return self.VERSION
@@ -119,7 +109,7 @@ class DisasterQuery(ApiQuery):
     def get_entity_name(self):
         return "DisasterDeclarationsSummaries"
 
-    def handle_json_api_response(self, json: str):
+    def handle_json_api_response(self, json):
 
         """
         Handles a response from a query of this ApiQuery.
@@ -132,40 +122,32 @@ class DisasterQuery(ApiQuery):
 
     def build_query_string(self):
         query_str = self.BASE_API_URI + "/" + self.get_version() + "/" + self.get_entity_name()
-        if self.start_date is not None:
-            date_filter_str = self.generate_date_filter_str(self.start_date)
-            query_str = self.add_filter_to_query(query_str, date_filter_str)
-        if self.declaration_type is not None:
-            declaration_type_filter_str = self.generate_declaration_type_filter_str(self.declaration_type)
-            query_str = self.add_filter_to_query(query_str, declaration_type_filter_str)
-        print("built query string: " + query_str)
+        if len(self.filters) > 0:
+            query_str += ApiQuery.PATH_QUERY_SEPARATOR + Filter.COMMAND_STRING + ApiQuery.QUERY_ASSIGNMENT_OPERATOR
+            for filter in self.filters:
+                query_str += filter.build_filter_string()
+        print("DisasterQuery.build_query_string(): built query string: " + query_str)
         return query_str
 
-    def add_filter_to_query(self, query_str: str, filter_str: str) -> str:
-        updated_query_str = query_str
-        if not self.filter_present(updated_query_str):
-            updated_query_str += self.PATH_QUERY_SEPARATOR + "$filter" + self.QUERY_ASSIGNMENT_OPERATOR
-        else:
-            updated_query_str += " and "
-        updated_query_str += filter_str
-        return updated_query_str
-
-    def filter_present(self, query_str: str) -> bool:
-        if "$filter=" in query_str:
-            return True
-        return False
-
-    def generate_date_filter_str(self, date: datetime) -> str:
-        date_filter = "incidentBeginDate gt '" + str(date) + "'"
-        return date_filter
-
-    def generate_declaration_type_filter_str(self, declaration_type : DeclarationType):
-        type_filter = "declarationType eq '{declaration_type}'".format(declaration_type=declaration_type)
-        return type_filter
-
     def add_filter(self, filter: Filter):
-        pass
+        self.filters.append(filter)
 
+
+class DeclarationTypeFilter(Filter):
+
+    DATA_FIELD: Final = "declarationType"
+
+    class DeclarationType(Enum):
+        EMERGENCY = "EM"
+        FIRE_MANAGEMENT = "FM"
+        MAJOR_DISASTER = "DR"
+
+    def __init__(self, type: DeclarationType):
+        self.d_type = type
+
+    def build_filter_string(self) -> str:
+        query_string = "{} {} {}".format(self.DATA_FIELD, Filter.LogicalOperator.EQUAL.value, self.d_type.value)
+        return query_string
 
 
 class ApiHandler:

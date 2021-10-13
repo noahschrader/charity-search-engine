@@ -1,7 +1,7 @@
 from django.test import TestCase
 from unittest.mock import patch # May need these for external API testing.
 import requests
-from FEMA import ApiHandler, DisasterQuery, ApiQuery, DateFilter, Filter
+from FEMA import ApiHandler, DisasterQuery, ApiQuery, DateFilter, Filter, DeclarationTypeFilter
 from datetime import datetime
 
 
@@ -84,6 +84,10 @@ class TestDisasterQuery(TestCase):
                                                           filter.build_filter_string())
         self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
 
+    def test_multi_filtered_qeury_string(self):
+        filter_1 = DateFilter(Filter.LogicalOperator.GREATER_THAN, datetime(2012, 4, 7))
+        # filter_2 = DeclarationTypeFilter()
+
 
 class TestDateFilter(TestCase):
 
@@ -98,6 +102,17 @@ class TestDateFilter(TestCase):
         date_filter = DateFilter(DateFilter.LogicalOperator.GREATER_THAN, datetime(2021, 8, 1))
         expected_string = "{} {} '{}'".format(date_filter.DATA_FIELD, date_filter.get_operator(), date_filter.get_date())
         self.assertEqual(date_filter.build_filter_string(), expected_string)
+
+
+class TestDeclarationTypeFilter(TestCase):
+
+    def test_query_string(self):
+        type = DeclarationTypeFilter.DeclarationType.MAJOR_DISASTER
+        dtf = DeclarationTypeFilter(type)
+        expected_filter_string = "{field} {equals} {type}".format(field=dtf.DATA_FIELD,
+                                                                  equals=Filter.LogicalOperator.EQUAL.value,
+                                                                  type=type.value)
+        self.assertEqual(expected_filter_string, dtf.build_filter_string())
 
 
 class FemaApi(TestCase):
