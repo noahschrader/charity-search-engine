@@ -1,6 +1,7 @@
 from typing import Final
 
 from django.test import TestCase
+from application.api.charity_navigator import get_organizations
 from unittest.mock import patch # May need these for external API testing.
 import requests
 from FEMA import ApiHandler, DisasterQuery, ApiQuery, DateFilter, Filter, DeclarationTypeFilter
@@ -9,10 +10,8 @@ from datetime import datetime
 
 class CharityNavigatorApi(TestCase):
     def testGetRequest(self):
-        query = {'app_id': '998e64be', 'app_key': 'c99ca3e66a3f61b839486371709a0cd4'}
-        response = requests.get('https://api.data.charitynavigator.org/v2/Organizations', query)
-        data = response.json()
-        self.assertTrue(data)
+        query = get_organizations({})
+        self.assertIsNotNone(query)
 
 
 class TestApiHandler(TestCase):

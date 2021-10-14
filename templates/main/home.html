@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="jumbotron text-center">
+         <h1 class="display-4">Charity Search Engine</h1>
+    </div>
+    <form action="{% url 'home' %}" method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group col-md-10">
+                <input type="text" class="form-control" name="search" placeholder="Search Charities">
+            </div>
+            <div class="form-group col-md-2">
+                <button type="submit" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom">Search</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
