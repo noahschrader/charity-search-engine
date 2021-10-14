@@ -124,8 +124,10 @@ class DisasterQuery(ApiQuery):
         query_str = self.BASE_API_URI + "/" + self.get_version() + "/" + self.get_entity_name()
         if len(self.filters) > 0:
             query_str += ApiQuery.PATH_QUERY_SEPARATOR + Filter.COMMAND_STRING + ApiQuery.QUERY_ASSIGNMENT_OPERATOR
-            for filter in self.filters:
+            for i, filter in enumerate(self.filters):
                 query_str += filter.build_filter_string()
+                if i < (len(self.filters) - 1):
+                    query_str += " " + Filter.LogicalOperator.AND.value + " "
         print("DisasterQuery.build_query_string(): built query string: " + query_str)
         return query_str
 
