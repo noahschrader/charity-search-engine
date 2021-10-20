@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    <form action="{% url 'search' %}" method="post">
-        {% csrf_token %}
+    <form action="{% url 'search' %}" method="get">
         <div class="form-row" style="padding-top: 15px">
             <div class="form-group col-md-8">
-                <input type="text" class="form-control" name="search" value="{{ search }}">
+                <input type="text" class="form-control" name="q" value="{{ search }}">
             </div>
             <div class="form-group col-md-2">
                 <button type="submit" class="btn btn-block btn-primary" data-toggle="tooltip" data-placement="bottom">Search</button>
@@ -14,16 +13,21 @@
             </div>
         </div>
     </form>
-    {% for charity in charities %}
-        <div class="form-group" style="font-weight: bold"><a href="{{ charity.websiteURL }}">{{ charity.charityName }}</a></div>
-        <div class="form-group">{{ charity.mission }}</div>
-    {% endfor %}
+        {% for charity in charities %}
+            <div class="form-group" style="font-weight: bold"><a href="{{ charity.websiteURL }}">{{ charity.charityName }}</a></div>
+            <div class="form-group">{{ charity.mission }}</div>
+        {% endfor %}
         <div class="row justify-content-center">
+            <input type="hidden" name="pageNum" value="{{ pageNum }}">
             <div class="form-group col-md-2">
-                <button type="submit" class="btn btn-block btn-primary" data-toggle="tooltip" data-placement="bottom">Prev</button>
+                <a href="{% url 'search' %}?q={{ search }}&pageNum={{ pageNum|add:-1 }}">
+                    <button type="submit" name="test" class="btn btn-block btn-primary" {% if pageNum == 1 %}disabled{% endif %}>Prev</button>
+                </a>
             </div>
             <div class="form-group col-md-2">
-                <button type="submit" class="btn btn-block btn-primary" data-toggle="tooltip" data-placement="bottom">Next</button>
+                <a href="{% url 'search' %}?q={{ search }}&pageNum={{ pageNum|add:1 }}">
+                    <button type="submit" class="btn btn-block btn-primary"{% if not hasNext %}disabled{% endif %}>Next</button>
+                </a>
             </div>
         </div>
 {% endblock  %}
