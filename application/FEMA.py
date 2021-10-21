@@ -52,7 +52,7 @@ class DateFilter(Filter):
         self.date = date
 
     def build_filter_string(self) -> str:
-        return "{} {} '{}'".format(self.DATA_FIELD, self.operator, self.date)
+        return "{} {} '{}'".format(self.DATA_FIELD, self.operator.value, self.date)
 
     def get_operator(self) -> Filter.LogicalOperator:
         return self.operator
@@ -148,7 +148,7 @@ class DeclarationTypeFilter(Filter):
         self.d_type = type
 
     def build_filter_string(self) -> str:
-        query_string = "{} {} {}".format(self.DATA_FIELD, Filter.LogicalOperator.EQUAL.value, self.d_type.value)
+        query_string = "{} {} '{}'".format(self.DATA_FIELD, Filter.LogicalOperator.EQUAL.value, self.d_type.value)
         return query_string
 
 
@@ -162,8 +162,6 @@ class ApiHandler:
         :returns: the result of query's handler_api_response() call or None if a response was not recieved.
         """
 
-        if not isinstance(query, ApiQuery):
-            raise TypeError("query is not a subclass of ApiQuery")
         query_string = query.build_query_string()
         response = requests.get(query_string)
         if not response.ok:

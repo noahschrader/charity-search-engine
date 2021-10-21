@@ -2,7 +2,7 @@ from typing import Final
 
 from django.test import TestCase
 from application.api.charity_navigator import get_organizations
-from unittest.mock import patch # May need these for external API testing.
+from unittest.mock import patch, MagicMock  # May need these for external API testing.
 import requests
 from FEMA import ApiHandler, DisasterQuery, ApiQuery, DateFilter, Filter, DeclarationTypeFilter
 from datetime import datetime
@@ -38,23 +38,11 @@ class TestApiHandler(TestCase):
         super().setUp()
         self.handler = ApiHandler()
 
-    def test_init(self):
-        self.assertIsNotNone(self.handler)
-
-    def test_empty_query(self):
-        with self.assertRaises(TypeError):
-            self.handler.query()
-
-    def test_bad_query_arg(self):
-        with self.assertRaises(TypeError):
-            self.handler.query(0)
-
-    def test_blank_build_query_string(self):
-
-        # This lets us choose the return value of build_query_String() to test when different urls are used.
-        with patch.object(TestApiHandler.TestQuery, 'build_query_string', return_value="") as mock_method:
-            with self.assertRaises(requests.exceptions.MissingSchema):
-                self.handler.query(self.TestQuery())
+    def test_return_none_on_bad_query(self):
+        ok_response = MagicMock(ok=False)
+        query = self.TestQuery()
+        with patch.object(requests, "get", return_value=ok_response):
+            self.assertIsNone(self.handler.query(query))
 
 
 class TestDisasterQuery(TestCase):
@@ -68,9 +56,9 @@ class TestDisasterQuery(TestCase):
             return self.filter_string
 
     def build_basic_expected_query_string(self, query_obj: DisasterQuery):
-        return self.disaster_query.BASE_API_URI +\
-                                "/" + self.disaster_query.VERSION +\
-                                "/" + self.disaster_query.ENTITY_NAME
+        return query_obj.BASE_API_URI +\
+                                "/" + query_obj.VERSION +\
+                                "/" + query_obj.ENTITY_NAME
 
     def setUp(self) -> None:
         super().setUp()
@@ -108,6 +96,7 @@ class TestDisasterQuery(TestCase):
                                 filter_2.build_filter_string()
         self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
 
+
 class TestDateFilter(TestCase):
 
     def test_getters(self):
@@ -119,8 +108,8 @@ class TestDateFilter(TestCase):
 
     def test_build_string(self):
         date_filter = DateFilter(DateFilter.LogicalOperator.GREATER_THAN, datetime(2021, 8, 1))
-        expected_string = "{} {} '{}'".format(date_filter.DATA_FIELD, date_filter.get_operator(), date_filter.get_date())
-        self.assertEqual(date_filter.build_filter_string(), expected_string)
+        expected_string = "{} {} '{}'".format(date_filter.DATA_FIELD, date_filter.get_operator().value, date_filter.get_date())
+        self.assertEqual(expected_string, date_filter.build_filter_string())
 
 
 class TestDeclarationTypeFilter(TestCase):
@@ -128,7 +117,7 @@ class TestDeclarationTypeFilter(TestCase):
     def test_query_string(self):
         for type in DeclarationTypeFilter.DeclarationType:
             dtf = DeclarationTypeFilter(type)
-            expected_filter_string = "{field} {equals} {type}".format(field=dtf.DATA_FIELD,
+            expected_filter_string = "{field} {equals} '{type}'".format(field=dtf.DATA_FIELD,
                                                                       equals=Filter.LogicalOperator.EQUAL.value,
                                                                       type=type.value)
             self.assertEqual(expected_filter_string, dtf.build_filter_string())
@@ -140,21 +129,21 @@ class FemaApi(TestCase):
         super().setUp()
         self.handler = ApiHandler()
 
-    # def test_demo(self):
-    #     start_date = datetime(2021, 8, 1)
-    #     type = DeclarationTypeFilter.DeclarationType.EMERGENCY
-    #     query = DisasterQuery()
-    #     query.add_filter(DateFilter(Filter.LogicalOperator.GREATER_THAN, start_date))
-    #     query.add_filter(DeclarationTypeFilter(type))
-    #     data = self.handler.query(query)
-    #     for disaster in data:
-    #         print(
-    #             "[" +
-    #             disaster[DisasterQuery.Field.DECLARATION_TITLE] +
-    #             ", " +
-    #             disaster[DisasterQuery.Field.DECLARATION_TYPE] +
-    #             ", " +
-    #             disaster[DisasterQuery.Field.INCIDENT_BEGIN_DATE] +
-    #             "]"
-    #         )
+    def test_demo(self):
+        start_date = datetime(2021, 8, 1)
+        type = DeclarationTypeFilter.DeclarationType.EMERGENCY
+        query = DisasterQuery()
+        query.add_filter(DateFilter(Filter.LogicalOperator.GREATER_THAN, start_date))
+        query.add_filter(DeclarationTypeFilter(type))
+        data = self.handler.query(query)
+        for disaster in data:
+            print(
+                "[" +
+                disaster[DisasterQuery.Field.DECLARATION_TITLE.value] +
+                ", " +
+                disaster[DisasterQuery.Field.DECLARATION_TYPE.value] +
+                ", " +
+                disaster[DisasterQuery.Field.INCIDENT_BEGIN_DATE.value] +
+                "]"
+            )
 
