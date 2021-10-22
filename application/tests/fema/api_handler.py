@@ -50,7 +50,4 @@ class TestApiHandler(TestCase):
         data = self.handler.query(DisasterQuery(), count)
         self.assertLessEqual(len(data), count)
 
-    def test_max_record_count(self):
-        count = ApiQuery.MAX_RECORD_COUNT
-        data = self.handler.query(DisasterQuery(), count)
-        self.assertGreater(len(data), ApiQuery.DEFAULT_RECORD_COUNT)
+

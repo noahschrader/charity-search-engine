@@ -16,7 +16,7 @@ class FEMAApi(TestCase):
         handler = ApiHandler()
         start_date = datetime.datetime(2020, 1, 1)
         query = DisasterQuery()
-        query.add_filter(DateFilter(Filter.LogicalOperator.GREATER_THAN_OR_EQUAL, start_date))
+        #query.add_filter(DateFilter(Filter.LogicalOperator.GREATER_THAN_OR_EQUAL, start_date))
         data = handler.query(query, 4700)
         print("Record count: " + str(len(data)))
         # for datum in data:

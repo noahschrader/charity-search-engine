@@ -184,11 +184,11 @@ class ApiHandler:
     def page_through(self, url: str, query_values: typing.Dict, record_count: int) -> typing.Dict:
         total_count = self.get_total_record_count(url, query_values)
         print("Found total count: " + str(total_count))
-        if total_count is -1:
+        if total_count == -1:
             return None
-        if record_count is ApiQuery.MAX_RECORD_COUNT:
+        if record_count == ApiQuery.MAX_RECORD_COUNT:
             record_count = total_count
-        full_count_iterations = int(record_count / 1000)
+        full_count_iterations = int(record_count / 1001)
         data = []
 
         for i in range(full_count_iterations + 1):
