@@ -28,7 +28,7 @@ class TestDisasterQuery(TestCase):
 
     def test_basic_query_string(self):
         expected_query_string = self.build_basic_expected_query_string(self.disaster_query)
-        self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
+        self.assertEqual(expected_query_string, self.disaster_query.build_query())
 
     def test_single_filtered_query_string(self):
         filter = self.TestFilter("This is a test")
@@ -38,7 +38,7 @@ class TestDisasterQuery(TestCase):
                                 Filter.COMMAND_STRING + \
                                 ApiQuery.ASSIGNMENT_OPERATOR + \
                                 filter.build_filter_string()
-        self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
+        self.assertEqual(expected_query_string, self.disaster_query.build_query())
 
     def test_multiple_filtered_query_strings(self):
         filter_1 = self.TestFilter("This is filter_1")
@@ -52,7 +52,7 @@ class TestDisasterQuery(TestCase):
                                 filter_1.build_filter_string() + \
                                 " " + Filter.LogicalOperator.AND.value + " " + \
                                 filter_2.build_filter_string()
-        self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
+        self.assertEqual(expected_query_string, self.disaster_query.build_query())
 
     def test_filters_getter(self):
         query = DisasterQuery()
@@ -61,3 +61,7 @@ class TestDisasterQuery(TestCase):
         filters = query.get_filters()
         self.assertEqual(1, len(filters))
         self.assertEqual(filter, filters[0])
+
+    def test(self):
+        self.disaster_query.add_filter(self.TestFilter("String"))
+        print(self.disaster_query.build_query())

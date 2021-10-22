@@ -21,7 +21,7 @@ class TestApiHandler(TestCase):
         def handle_json_api_response(self, json):
             pass
 
-        def build_query_string(self):
+        def build_query(self):
             return ""
 
         def add_filter(self, filter: Filter):
@@ -49,3 +49,8 @@ class TestApiHandler(TestCase):
         count = 12
         data = self.handler.query(DisasterQuery(), count)
         self.assertLessEqual(len(data), count)
+
+    def test_max_record_count(self):
+        count = ApiQuery.MAX_RECORD_COUNT
+        data = self.handler.query(DisasterQuery(), count)
+        self.assertGreater(len(data), ApiQuery.DEFAULT_RECORD_COUNT)

@@ -70,6 +70,7 @@ class ApiQuery(abc.ABC):
     ASSIGNMENT_OPERATOR: Final = "="
     ARGUMENT_SEPARATOR = "&"
     DEFAULT_RECORD_COUNT = 1000
+    MAX_RECORD_COUNT = -1
 
     @abc.abstractmethod
     def get_version(self) -> str:
@@ -84,7 +85,7 @@ class ApiQuery(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def build_query_string(self) -> str:
+    def build_query(self) -> typing.Dict:
         pass
 
     @abc.abstractmethod
@@ -110,11 +111,11 @@ class DisasterQuery(ApiQuery):
         super()
         self.filters = []
 
-    def get_version(self):
+    def get_version(self) -> str:
         return self.VERSION
 
-    def get_entity_name(self):
-        return "DisasterDeclarationsSummaries"
+    def get_entity_name(self) -> str:
+        return self.ENTITY_NAME
 
     def handle_json_api_response(self, json):
 
@@ -127,15 +128,19 @@ class DisasterQuery(ApiQuery):
         disasters = json[self.ENTITY_NAME]
         return disasters
 
-    def build_query_string(self):
-        query_str = self.BASE_API_URI + "/" + self.get_version() + "/" + self.get_entity_name()
-        if len(self.filters) > 0:
-            query_str += ApiQuery.PATH_QUERY_SEPARATOR + Filter.COMMAND_STRING + ApiQuery.ASSIGNMENT_OPERATOR
-            for i, filter in enumerate(self.filters):
-                query_str += filter.build_filter_string()
-                if i < (len(self.filters) - 1):
-                    query_str += " " + Filter.LogicalOperator.AND.value + " "
-        return query_str
+    def build_query(self) -> typing.Dict:
+        combined_filter_string = ""
+
+        for i, fltr in enumerate(self.filters):
+            combined_filter_string += fltr.build_filter_string()
+            if i < len(self.filters) - 1:
+                combined_filter_string += " " + Filter.LogicalOperator.AND.value + " "
+
+        query = {
+            Filter.COMMAND_STRING: combined_filter_string
+        }
+
+        return query
 
     def add_filter(self, filter: Filter):
         self.filters.append(filter)
@@ -171,15 +176,36 @@ class ApiHandler:
         :returns: the result of query's handler_api_response() call or None if a response was not recieved.
         """
 
-        query_string = query.build_query_string()
-        if ApiQuery.PATH_QUERY_SEPARATOR in query_string:
-            query_string += ApiQuery.ARGUMENT_SEPARATOR
-        else:
-            query_string += ApiQuery.PATH_QUERY_SEPARATOR
-        query_string += "$top=" + str(record_count)
-        print("ApiHandler: querying :" + query_string)
-        response = requests.get(query_string)
-        if not response.ok:
+        query_values = query.build_query()
+        uri = "{base}/{v}/{e}".format(base=query.BASE_API_URI, v=query.get_version(), e=query.get_entity_name())
+        json_data = self.page_through(uri, query_values, record_count)
+        return json_data
+
+    def page_through(self, url: str, query_values: typing.Dict, record_count: int) -> typing.Dict:
+        total_count = self.get_total_record_count(url, query_values)
+        print("Found total count: " + str(total_count))
+        if total_count is -1:
             return None
-        json_data = response.json()
-        return query.handle_json_api_response(json_data)
+
+        full_count_iterations = int(total_count / 1000)
+        data = []
+
+        for i in range(full_count_iterations + 1):
+            query_values["$skip"] = 1000 * i
+            response = requests.get(url, query_values)
+            print("Response url: " + str(response.url))
+            if not response.ok:
+                return None
+
+            data.extend(response.json().get("DisasterDeclarationsSummaries"))
+
+        return data
+
+    def get_total_record_count(self, url, query_values) -> int:
+        query_values_cpy = query_values.copy()
+        query_values_cpy["$top"] = 1
+        query_values_cpy["$inlinecount"] = "allpages"
+        response = requests.get(url, query_values_cpy)
+        if not response.ok:
+            return -1
+        return response.json().get("metadata").get("count")
