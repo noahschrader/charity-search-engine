@@ -186,12 +186,14 @@ class ApiHandler:
         print("Found total count: " + str(total_count))
         if total_count is -1:
             return None
-
-        full_count_iterations = int(total_count / 1000)
+        if record_count is ApiQuery.MAX_RECORD_COUNT:
+            record_count = total_count
+        full_count_iterations = int(record_count / 1000)
         data = []
 
         for i in range(full_count_iterations + 1):
             query_values["$skip"] = 1000 * i
+            query_values["$top"] = min(record_count - query_values.get("$skip"), 1000)
             response = requests.get(url, query_values)
             print("Response url: " + str(response.url))
             if not response.ok:
