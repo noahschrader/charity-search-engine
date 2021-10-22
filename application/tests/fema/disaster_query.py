@@ -33,10 +33,10 @@ class TestDisasterQuery(TestCase):
     def test_single_filtered_query_string(self):
         filter = self.TestFilter("This is a test")
         self.disaster_query.add_filter(filter)
-        expected_query_string = self.build_basic_expected_query_string(self.disaster_query) +\
-                                ApiQuery.PATH_QUERY_SEPARATOR +\
-                                Filter.COMMAND_STRING +\
-                                ApiQuery.QUERY_ASSIGNMENT_OPERATOR +\
+        expected_query_string = self.build_basic_expected_query_string(self.disaster_query) + \
+                                ApiQuery.PATH_QUERY_SEPARATOR + \
+                                Filter.COMMAND_STRING + \
+                                ApiQuery.ASSIGNMENT_OPERATOR + \
                                 filter.build_filter_string()
         self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
 
@@ -48,8 +48,16 @@ class TestDisasterQuery(TestCase):
         expected_query_string = self.build_basic_expected_query_string(self.disaster_query) + \
                                 ApiQuery.PATH_QUERY_SEPARATOR + \
                                 Filter.COMMAND_STRING + \
-                                ApiQuery.QUERY_ASSIGNMENT_OPERATOR + \
-                                filter_1.build_filter_string() +\
-                                " " + Filter.LogicalOperator.AND.value + " " +\
+                                ApiQuery.ASSIGNMENT_OPERATOR + \
+                                filter_1.build_filter_string() + \
+                                " " + Filter.LogicalOperator.AND.value + " " + \
                                 filter_2.build_filter_string()
         self.assertEqual(expected_query_string, self.disaster_query.build_query_string())
+
+    def test_filters_getter(self):
+        query = DisasterQuery()
+        filter = self.TestFilter("")
+        query.add_filter(filter)
+        filters = query.get_filters()
+        self.assertEqual(1, len(filters))
+        self.assertEqual(filter, filters[0])

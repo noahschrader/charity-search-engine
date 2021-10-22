@@ -15,8 +15,9 @@ FEMA time format:
 YYYY-MM-DDTHH:MM:SS.mmmz
 
 """
+import typing
 from enum import Enum
-from typing import Final
+from typing import Final, List
 
 import requests
 import abc
@@ -66,26 +67,32 @@ class ApiQuery(abc.ABC):
 
     BASE_API_URI: Final = "https://www.fema.gov/api/open"
     PATH_QUERY_SEPARATOR: Final = "?"
-    QUERY_ASSIGNMENT_OPERATOR: Final = "="
+    ASSIGNMENT_OPERATOR: Final = "="
+    ARGUMENT_SEPARATOR = "&"
+    DEFAULT_RECORD_COUNT = 1000
 
     @abc.abstractmethod
-    def get_version(self):
+    def get_version(self) -> str:
         pass
 
     @abc.abstractmethod
-    def get_entity_name(self):
+    def get_entity_name(self) -> str:
         pass
 
     @abc.abstractmethod
-    def handle_json_api_response(self, json: str):
+    def handle_json_api_response(self, json: str) -> typing.Dict:
         pass
 
     @abc.abstractmethod
-    def build_query_string(self):
+    def build_query_string(self) -> str:
         pass
 
     @abc.abstractmethod
     def add_filter(self, filter: Filter):
+        pass
+
+    @abc.abstractmethod
+    def get_filters(self) -> List:
         pass
 
 
@@ -117,22 +124,24 @@ class DisasterQuery(ApiQuery):
         :return: A set of JSON disaster summaries which can be accessed using this classes Fields.
         """
 
-        disasters = json["DisasterDeclarationsSummaries"]
+        disasters = json[self.ENTITY_NAME]
         return disasters
 
     def build_query_string(self):
         query_str = self.BASE_API_URI + "/" + self.get_version() + "/" + self.get_entity_name()
         if len(self.filters) > 0:
-            query_str += ApiQuery.PATH_QUERY_SEPARATOR + Filter.COMMAND_STRING + ApiQuery.QUERY_ASSIGNMENT_OPERATOR
+            query_str += ApiQuery.PATH_QUERY_SEPARATOR + Filter.COMMAND_STRING + ApiQuery.ASSIGNMENT_OPERATOR
             for i, filter in enumerate(self.filters):
                 query_str += filter.build_filter_string()
                 if i < (len(self.filters) - 1):
                     query_str += " " + Filter.LogicalOperator.AND.value + " "
-        print("DisasterQuery.build_query_string(): built query string: " + query_str)
         return query_str
 
     def add_filter(self, filter: Filter):
         self.filters.append(filter)
+
+    def get_filters(self) -> List:
+        return self.filters
 
 
 class DeclarationTypeFilter(Filter):
@@ -154,7 +163,7 @@ class DeclarationTypeFilter(Filter):
 
 class ApiHandler:
 
-    def query(self, query: ApiQuery):
+    def query(self, query: ApiQuery, record_count=ApiQuery.DEFAULT_RECORD_COUNT):
 
         """
         Queries the FEMA API using the given ApiQuery object.
@@ -163,6 +172,12 @@ class ApiHandler:
         """
 
         query_string = query.build_query_string()
+        if ApiQuery.PATH_QUERY_SEPARATOR in query_string:
+            query_string += ApiQuery.ARGUMENT_SEPARATOR
+        else:
+            query_string += ApiQuery.PATH_QUERY_SEPARATOR
+        query_string += "$top=" + str(record_count)
+        print("ApiHandler: querying :" + query_string)
         response = requests.get(query_string)
         if not response.ok:
             return None

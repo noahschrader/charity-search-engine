@@ -1,9 +1,10 @@
+from typing import List
 from unittest.mock import MagicMock, patch
 
 import requests
 from django.test import TestCase
 
-from application.fema.FEMA import ApiQuery, Filter, ApiHandler
+from application.fema.FEMA import ApiQuery, Filter, ApiHandler, DisasterQuery
 
 
 class TestApiHandler(TestCase):
@@ -21,9 +22,12 @@ class TestApiHandler(TestCase):
             pass
 
         def build_query_string(self):
-            pass
+            return ""
 
         def add_filter(self, filter: Filter):
+            pass
+
+        def get_filters(self) -> List:
             pass
 
     def setUp(self) -> None:
@@ -35,3 +39,13 @@ class TestApiHandler(TestCase):
         query = self.TestQuery()
         with patch.object(requests, "get", return_value=ok_response):
             self.assertIsNone(self.handler.query(query))
+
+    def test_default_record_count(self):
+        query = DisasterQuery()
+        data = self.handler.query(query)
+        self.assertLessEqual(len(data), ApiQuery.DEFAULT_RECORD_COUNT)
+
+    def test_arbitrary_record_count(self):
+        count = 12
+        data = self.handler.query(DisasterQuery(), count)
+        self.assertLessEqual(len(data), count)
