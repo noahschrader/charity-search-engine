@@ -22,7 +22,7 @@ class TestApiHandler(TestCase):
             pass
 
         def build_query(self):
-            return ""
+            return {}
 
         def add_filter(self, filter: Filter):
             pass
@@ -49,5 +49,4 @@ class TestApiHandler(TestCase):
         count = 12
         data = self.handler.query(DisasterQuery(), count)
         self.assertLessEqual(len(data), count)
-
 

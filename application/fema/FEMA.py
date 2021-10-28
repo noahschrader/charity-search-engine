@@ -130,15 +130,16 @@ class DisasterQuery(ApiQuery):
 
     def build_query(self) -> typing.Dict:
         combined_filter_string = ""
-
+        query = {}
         for i, fltr in enumerate(self.filters):
             combined_filter_string += fltr.build_filter_string()
             if i < len(self.filters) - 1:
                 combined_filter_string += " " + Filter.LogicalOperator.AND.value + " "
 
-        query = {
-            Filter.COMMAND_STRING: combined_filter_string
-        }
+        if combined_filter_string != "":
+            query = {
+                Filter.COMMAND_STRING: combined_filter_string
+            }
 
         return query
 
@@ -183,7 +184,6 @@ class ApiHandler:
 
     def page_through(self, url: str, query_values: typing.Dict, record_count: int) -> typing.Dict:
         total_count = self.get_total_record_count(url, query_values)
-        print("Found total count: " + str(total_count))
         if total_count == -1:
             return None
         if record_count == ApiQuery.MAX_RECORD_COUNT:
@@ -195,7 +195,6 @@ class ApiHandler:
             query_values["$skip"] = 1000 * i
             query_values["$top"] = min(record_count - query_values.get("$skip"), 1000)
             response = requests.get(url, query_values)
-            print("Response url: " + str(response.url))
             if not response.ok:
                 return None
 
