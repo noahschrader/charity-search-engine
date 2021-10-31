@@ -13,4 +13,10 @@
             </div>
         </div>
     </form>
+    <div class="button-group bg-primary" style="border-radius: 5px">
+        <button type="button" class="btn btn-primary">Recent Disasters</button>
+    </div>
+    {% for disaster in disasters %}
+        <a class="text-blue" href="/search/?q={{ disaster }}">{{ disaster }}</a><br>
+    {% endfor %}
 {% endblock %}

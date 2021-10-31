@@ -106,6 +106,7 @@ class DisasterQuery(ApiQuery):
         DECLARATION_TYPE = "declarationType"
         DECLARATION_TITLE = "declarationTitle"
         INCIDENT_BEGIN_DATE = "incidentBeginDate"
+        INCIDENT_TYPE = "incidentType"
 
     def __init__(self):
         super()
