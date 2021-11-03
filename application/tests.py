@@ -1,5 +1,5 @@
 from django.test import TestCase
-from application.api.charity_navigator import get_organizations
+from application.api.charity_navigator.charity_navigator import get_organizations
 
 
 class CharityNavigatorApi(TestCase):
