@@ -3,19 +3,19 @@ import typing
 
 from django.shortcuts import render
 from django.views import View
+from typing import List, Dict, Any
 
-from application.api.charity_navigator import get_organizations, SortType
-from application.fema.FEMA import DisasterQuery, DateFilter, Filter, ApiHandler, DeclarationTypeFilter
+from application.fema.FEMA import DisasterQuery, DateFilter, Filter, ApiHandler
 
 
-def get_disaster_title_list(disasters: typing.Dict):
+def get_list_of_disaster_titles(disasters: typing.Dict):
     lst = []
     for d in disasters:
         lst.append(d[DisasterQuery.Field.DECLARATION_TITLE.value])
     return lst
 
 
-def count_strings(lst: typing.List[str]) -> typing.Dict:
+def count_strings_in_list(lst: List[str]) -> Dict:
     counts = {}
     for s in lst:
         if s not in counts.keys():
@@ -24,7 +24,7 @@ def count_strings(lst: typing.List[str]) -> typing.Dict:
     return counts
 
 
-def lookup_recent_disasters():
+def lookup_recent_disasters() -> List[str]:
     query = DisasterQuery()
 
     # Setup date filter for records from the last 30 days.
@@ -38,14 +38,14 @@ def lookup_recent_disasters():
     # Query for disasters.
     disasters = handler.query(query)
 
-    titles = get_disaster_title_list(disasters)
-    title_counts = count_strings(titles)
+    titles = get_list_of_disaster_titles(disasters)
+    title_counts = count_strings_in_list(titles)
     sorted_counts = dict(sorted(title_counts.items(), key=lambda item: item[1], reverse=True))
     return list(sorted_counts.keys())
 
 
 class Home(View):
     def get(self, request):
-        top_disasters = lookup_recent_disasters()
+        top_disasters = lookup_recent_disasters()[0:10]
 
         return render(request, "main/home.html", {"disasters": top_disasters})
