@@ -14,9 +14,17 @@
         </div>
     </form>
     <div class="button-group bg-primary" style="border-radius: 5px">
-        <button type="button" class="btn btn-primary">Recent Disasters</button>
+        {% for option in menu_options %}
+            {% if option.is_selected == True %}
+                <button id="btn_{{ option.text }}" type="button" class="btn btn-success" onclick="">{{ option.text }}</button>
+            {% else %}
+                <button id="btn_{{ option.text }}" type="button" class="btn btn-primary" onclick="">{{ option.text }}</button>
+            {% endif %}
+        {% endfor %}
     </div>
-    {% for disaster in disasters %}
-        <a class="text-blue" href="/search/?q={{ disaster }}">{{ disaster }}</a><br>
-    {% endfor %}
+    <div>
+        {% for item in items %}
+            <a class="text-blue" href="/search/?q={{ item }}">{{ item }}</a><br>
+        {% endfor %}
+    </div>
 {% endblock %}
