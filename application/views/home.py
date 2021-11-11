@@ -80,8 +80,7 @@ class Home(View):
 
     def get(self, request):
         menu_buttons = [
-            vars(Button("Recent Disasters", True)),
-            vars(Button("Nearby Charities", False))
+            vars(Button("Recent Disasters", False))
         ]
         print(menu_buttons)
         top_disasters = lookup_recent_disasters()[0:10]
