@@ -13,4 +13,18 @@
             </div>
         </div>
     </form>
+    <div class="button-group bg-primary" style="border-radius: 5px">
+        {% for option in menu_options %}
+            {% if option.is_selected == True %}
+                <button id="btn_{{ option.text }}" type="button" class="btn btn-success" onclick="">{{ option.text }}</button>
+            {% else %}
+                <button id="btn_{{ option.text }}" type="button" class="btn btn-primary" onclick="">{{ option.text }}</button>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div>
+        {% for item in items %}
+            <a class="text-blue" href="/search/?q={{ item }}">{{ item }}</a><br>
+        {% endfor %}
+    </div>
 {% endblock %}
