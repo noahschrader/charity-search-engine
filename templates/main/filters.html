@@ -12,7 +12,11 @@
                      </div>
                      <div class="form-group col-md-4">
                          <label>State</label>
-                         <input type="text" class="form-control" name="state">
+                         <select class="form-control" name="state">
+                             {% for filter in filters.stateType %}
+                                 <option>{{ filter.value }}</option>
+                             {% endfor %}
+                         </select>
                      </div>
                      <div class="form-group col-md-4">
                          <label>Zip Code</label>
@@ -24,7 +28,7 @@
                          <label>Sort</label>
                          <select class="form-control" name="sort">
                              {% for filter in filters.sortType %}
-                                 <option>{{ filter.name }}</option>
+                                 <option>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
@@ -32,7 +36,7 @@
                          <label>Scope</label>
                          <select class="form-control" name="scope">
                              {% for filter in filters.scopeType %}
-                                 <option>{{ filter.name }}</option>
+                                 <option>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
@@ -40,7 +44,7 @@
                          <label>Search Type</label>
                          <select class="form-control" name="searchType">
                              {% for filter in filters.searchType %}
-                                 <option>{{ filter.name }}</option>
+                                 <option>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>

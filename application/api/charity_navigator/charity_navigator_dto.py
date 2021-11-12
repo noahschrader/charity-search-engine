@@ -6,24 +6,79 @@ app_key = 'c99ca3e66a3f61b839486371709a0cd4'
 
 
 class SearchType(Enum):
-    DEFAULT = 'DEFAULT'
-    NAME_ONLY = 'NAME_ONLY'
+    DEFAULT = ''
+    NAME_ONLY = 'Organization Name'
 
 
 class ScopeType(Enum):
-    ALL = 'ALL'
-    REGIONAL = 'REGIONAL'
-    NATIONAL = 'NATIONAL'
-    INTERNATIONAL = 'INTERNATIONAL'
+    ALL = ''
+    REGIONAL = 'Regional'
+    NATIONAL = 'National'
+    INTERNATIONAL = 'International'
 
 
 class SortType(Enum):
-    RELEVANCE = 'RELEVANCE:DESC'
-    RATING = 'RATING:DESC'
-    NAME = 'NAME:ASC'
+    RELEVANCE = 'Relevance'
+    RATING = 'Rating'
+    NAME = 'Name'
 
 
-filters = {'searchType': list(SearchType), 'scopeType': list(ScopeType), 'sortType': list(SortType)}
+class StateType(Enum):
+    DEFAULT = ''
+    AL = 'Alabama'
+    AK = 'Alaska'
+    AZ = 'Arizona'
+    AR = 'Arkansas'
+    CA = 'California'
+    CO = 'Colorado'
+    CT = 'Connecticut'
+    DE = 'Delaware'
+    FL = 'Florida'
+    GA = 'Georgia'
+    HI = 'Hawaii'
+    ID = 'Idaho'
+    IL = 'Illinois'
+    IN = 'Indiana'
+    IA = 'Iowa'
+    KS = 'Kansas'
+    KY = 'Kentucky'
+    LA = 'Louisiana'
+    ME = 'Maine'
+    MD = 'Maryland'
+    MA = 'Massachusetts'
+    MI = 'Michigan'
+    MN = 'Minnesota'
+    MS = 'Mississippi'
+    MO = 'Missouri'
+    MT = 'Montana'
+    NE = 'Nebraska'
+    NV = 'Nevada'
+    NH = 'New Hampshire'
+    NJ = 'New Jersey'
+    NM = 'New Mexico'
+    NY = 'New York'
+    NC = 'North Carolina'
+    ND = 'North Dakota'
+    OH = 'Ohio'
+    OK = 'Oklahoma'
+    OR = 'Oregon'
+    PA = 'Pennsylvania'
+    RI = 'Rhode Island'
+    SC = 'South Carolina'
+    SD = 'South Dakota'
+    TN = 'Tennessee'
+    TX = 'Texas'
+    UT = 'Utah'
+    VT = 'Vermont'
+    VA = 'Virginia'
+    WA = 'Washington'
+    WV = 'West Virginia'
+    WI = 'Wisconsin'
+    WY = 'Wyoming'
+
+
+filters = {'searchType': list(SearchType), 'scopeType': list(ScopeType), 'sortType': list(SortType),
+           'stateType': list(StateType)}
 
 
 @dataclass
