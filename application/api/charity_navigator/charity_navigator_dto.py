@@ -77,8 +77,8 @@ class StateType(Enum):
     WY = 'Wyoming'
 
 
-filters = {'searchType': list(SearchType), 'scopeType': list(ScopeType), 'sortType': list(SortType),
-           'stateType': list(StateType)}
+filter_values = {'searchType': list(SearchType), 'scopeType': list(ScopeType), 'sortType': list(SortType),
+                 'stateType': list(StateType)}
 
 
 @dataclass

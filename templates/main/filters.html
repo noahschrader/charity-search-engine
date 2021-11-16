@@ -8,43 +8,43 @@
                  <div class="form-row">
                      <div class="form-group col-md-4">
                          <label>City</label>
-                         <input type="text" class="form-control" name="city">
+                         <input type="text" class="form-control" name="city" value="{{ applied_filters.city }}">
                      </div>
                      <div class="form-group col-md-4">
                          <label>State</label>
                          <select class="form-control" name="state">
-                             {% for filter in filters.stateType %}
-                                 <option>{{ filter.value }}</option>
+                             {% for filter in filter_values.stateType %}
+                                 <option {% if applied_filters.state == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
                      <div class="form-group col-md-4">
                          <label>Zip Code</label>
-                         <input type="search" class="form-control" name="zip">
+                         <input type="text" class="form-control" name="zip" value="{{ applied_filters.zip }}">
                      </div>
                  </div>
                  <div class="form-row">
                      <div class="form-group col-md-4">
                          <label>Sort</label>
                          <select class="form-control" name="sort">
-                             {% for filter in filters.sortType %}
-                                 <option>{{ filter.value }}</option>
+                             {% for filter in filter_values.sortType %}
+                                 <option {% if applied_filters.sort == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
                      <div class="form-group col-md-4">
                          <label>Scope</label>
                          <select class="form-control" name="scope">
-                             {% for filter in filters.scopeType %}
-                                 <option>{{ filter.value }}</option>
+                             {% for filter in filter_values.scopeType %}
+                                 <option {% if applied_filters.scope == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
                      <div class="form-group col-md-4">
                          <label>Search Type</label>
                          <select class="form-control" name="searchType">
-                             {% for filter in filters.searchType %}
-                                 <option>{{ filter.value }}</option>
+                             {% for filter in filter_values.searchType %}
+                                 <option {% if applied_filters.searchType == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
                          </select>
                      </div>
