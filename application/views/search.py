@@ -5,7 +5,7 @@ from application.api.charity_navigator.charity_navigator_dto import CharityNavig
     SortType, StateType, filter_values
 
 
-class Search(View):
+class SearchView(View):
     def __init__(self):
         super().__init__()
         self.applied_filters = {}
