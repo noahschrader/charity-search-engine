@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
     <div class="jumbotron text-center">
          <h1 class="display-4">Charity Search Engine</h1>
+        <img src="{% static "charity_search_icon.png" %}"/>
     </div>
     <form action="{% url 'search' %}" method="get">
         <div class="form-row">
