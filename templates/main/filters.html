@@ -1,18 +1,18 @@
- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+ <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
      <div class="modal-dialog">
          <div class="modal-content">
              <div class="modal-header">
-                 <h5 class="modal-title" id="exampleModalLabel">Advanced Filters</h5>
+                 <h5 class="modal-title" id="filtersModalLabel">Advanced Filters</h5>
              </div>
              <div class="modal-body">
                  <div class="form-row">
                      <div class="form-group col-md-4">
                          <label>City</label>
-                         <input type="text" class="form-control" name="city" value="{{ applied_filters.city }}">
+                         <input type="text" class="form-control" id="city" name="city" value="{{ applied_filters.city }}">
                      </div>
                      <div class="form-group col-md-4">
                          <label>State</label>
-                         <select class="form-control" name="state">
+                         <select class="form-control" id="state" name="state">
                              {% for filter in filter_values.stateType %}
                                  <option {% if applied_filters.state == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
@@ -20,13 +20,13 @@
                      </div>
                      <div class="form-group col-md-4">
                          <label>Zip Code</label>
-                         <input type="text" class="form-control" name="zip" value="{{ applied_filters.zip }}">
+                         <input type="text" class="form-control" id="zip" name="zip" value="{{ applied_filters.zip }}">
                      </div>
                  </div>
                  <div class="form-row">
                      <div class="form-group col-md-4">
                          <label>Sort</label>
-                         <select class="form-control" name="sort">
+                         <select class="form-control" id="sort" name="sort">
                              {% for filter in filter_values.sortType %}
                                  <option {% if applied_filters.sort == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
@@ -34,7 +34,7 @@
                      </div>
                      <div class="form-group col-md-4">
                          <label>Scope</label>
-                         <select class="form-control" name="scope">
+                         <select class="form-control" id="scope" name="scope">
                              {% for filter in filter_values.scopeType %}
                                  <option {% if applied_filters.scope == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
@@ -42,7 +42,7 @@
                      </div>
                      <div class="form-group col-md-4">
                          <label>Search Type</label>
-                         <select class="form-control" name="searchType">
+                         <select class="form-control" id="searchType" name="searchType">
                              {% for filter in filter_values.searchType %}
                                  <option {% if applied_filters.searchType == filter.value %}selected{% endif %}>{{ filter.value }}</option>
                              {% endfor %}
@@ -60,12 +60,16 @@
 </div>
 
 <script>
-    $('#exampleModal').on('shown.bs.modal', function () {
-    $('#exampleModalLabel').trigger('focus') })
-</script>
+    $('#filtersModal').on('shown.bs.modal', function () {
+        $('#filtersModalLabel').trigger('focus')
+    });
 
-<script>
     function clearFilters() {
-        
+        document.getElementById('city').value = '';
+        document.getElementById('state').value = '';
+        document.getElementById('zip').value = '';
+        document.getElementById('sort').value = 'Relevance';
+        document.getElementById('scope').value = '';
+        document.getElementById('searchType').value = '';
     }
 </script>
