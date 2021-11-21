@@ -51,8 +51,8 @@
                  </div>
              </div>
              <div class="modal-footer">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onClick="this.form.reset()">Cancel</button>
-                 <button type="button" class="btn btn-danger">Clear Filters</button>
+                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="this.form.reset()">Cancel</button>
+                 <button type="button" class="btn btn-danger" onclick="clearFilters()">Clear Filters</button>
                  <button type="submit" class="btn btn-primary">Apply Filters</button>
              </div>
          </div>
@@ -62,4 +62,10 @@
 <script>
     $('#exampleModal').on('shown.bs.modal', function () {
     $('#exampleModalLabel').trigger('focus') })
+</script>
+
+<script>
+    function clearFilters() {
+        
+    }
 </script>

@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from application.fema.FEMA import DeclarationTypeFilter, Filter
+from application.api.FEMA import DeclarationTypeFilter, Filter
 
 
 class TestDeclarationTypeFilter(TestCase):

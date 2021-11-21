@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from application.fema.FEMA import Filter, DisasterQuery, ApiQuery
+from application.api.FEMA import Filter, DisasterQuery
 
 
 class TestDisasterQuery(TestCase):

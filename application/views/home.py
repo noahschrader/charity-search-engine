@@ -5,7 +5,7 @@ from typing import List, Dict
 from django.shortcuts import render
 from django.views import View
 
-from application.fema.FEMA import DisasterQuery, DateFilter, Filter, ApiHandler
+from application.api.FEMA import DisasterQuery, DateFilter, Filter, ApiHandler
 
 
 def get_list_of_disaster_titles(disasters: typing.Dict):

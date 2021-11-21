@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from application.fema.FEMA import DateFilter
+from application.api.FEMA import DateFilter
 
 
 class TestDateFilter(TestCase):

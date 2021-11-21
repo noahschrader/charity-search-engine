@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.views import View
-from application.api.charity_navigator.charity_navigator import get_organizations
-from application.api.charity_navigator.charity_navigator_dto import CharityNavigatorDto, SearchType, ScopeType, \
-    SortType, StateType, filter_values
+from application.api.charity_navigator import get_organizations
+from application.api.charity_navigator_dto import CharityNavigatorDto, SearchType, ScopeType, SortType, StateType, \
+    filter_values
 
 
 class SearchView(View):

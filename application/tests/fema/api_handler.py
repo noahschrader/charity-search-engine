@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import requests
 from django.test import TestCase
 
-from application.fema.FEMA import ApiQuery, Filter, ApiHandler, DisasterQuery
+from application.api.FEMA import ApiQuery, Filter, ApiHandler, DisasterQuery
 
 
 class TestApiHandler(TestCase):
