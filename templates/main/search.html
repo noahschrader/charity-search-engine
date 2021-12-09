@@ -22,6 +22,11 @@
             </div>
         </div>
     </form>
+    {% if no_charities_returned %}
+        <div class="d-flex justify-content-center" style="color:grey; margin-bottom: 1.5rem">
+            {{ empty_search_string }}
+        </div>
+    {% endif %}
     {% for charity in charities %}
         <div class="form-group" style="font-weight: bold"><a href="{{ charity.websiteURL }}">{{ charity.charityName }}</a></div>
         <div class="form-group">{{ charity.mission }}</div>
