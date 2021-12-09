@@ -11,7 +11,7 @@ from application.api.FEMA import DisasterQuery, DateFilter, Filter, ApiHandler
 def get_list_of_disaster_titles(disasters: typing.Dict):
     lst = []
     for d in disasters:
-        lst.append(d[DisasterQuery.Field.DECLARATION_TITLE.value])
+        lst.append(d[DisasterQuery.Field.DECLARATION_TITLE.value].title())
     return lst
 
 
@@ -49,39 +49,8 @@ def lookup_recent_disasters(scope_in_days=90) -> List[str]:
     return list(sorted_counts.keys())
 
 
-class Button:
-
-    def __init__(self, text="", is_selected=False):
-        """
-        :param text: The text to be displayed on the button.
-        :param is_selected: Indicates if a button is currently selected.
-        """
-        self.text = text
-        self.is_selected = is_selected
-
-    def get_text(self) -> str:
-        """
-        :return: The current text value of this button.
-        """
-        return self.text
-
-    def set_text(self, new_text) -> str:
-        """
-        Sets the text of the button.
-        :param new_text: Text to be set to.
-        :return: The old text.
-        """
-        prev = self.text
-        self.text = new_text
-        return prev
-
-
 class Home(View):
 
     def get(self, request):
-        menu_buttons = [
-            vars(Button("Recent Disasters", False))
-        ]
-        print(menu_buttons)
         top_disasters = lookup_recent_disasters()[0:10]
-        return render(request, "main/home.html", {"items": top_disasters, "menu_options": menu_buttons})
+        return render(request, "main/home.html", {"items": top_disasters})

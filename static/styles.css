@@ -1,0 +1,9 @@
+
+html, body, .container {
+    height: 100%;
+    width: 100%;
+}
+
+.flex-row {
+    gap: 10px
+}
