@@ -11,7 +11,8 @@ from application.api.charity_navigator_dto import CharityNavigatorDto, SearchTyp
 class SearchView(View):
 
     empty_search_strings = [
-        "Wow. Such empty."
+        "Wow. Such empty. Please try another search.",
+        "Sorry, we found no results. Please try another search phrase or term."
     ]
 
     def __init__(self):
