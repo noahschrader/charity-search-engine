@@ -1,3 +1,6 @@
+import random
+from typing import Dict, List
+
 from django.shortcuts import render
 from django.views import View
 from application.api.charity_navigator import get_organizations
@@ -6,6 +9,12 @@ from application.api.charity_navigator_dto import CharityNavigatorDto, SearchTyp
 
 
 class SearchView(View):
+
+    empty_search_strings = [
+        "Wow. Such empty. Please try another search.",
+        "Sorry, we found no results. Please try another search phrase or term."
+    ]
+
     def __init__(self):
         super().__init__()
         self.applied_filters = {}
@@ -31,9 +40,27 @@ class SearchView(View):
     def get(self, request):
         self.store_applied_filters(request)
         dto = self.construct_dto(request)
+        c = self.__setup_context(dto)
+        return render(request, 'main/search.html', c)
+
+    def __setup_context(self, dto: CharityNavigatorDto) -> Dict:
         charities = get_organizations(dto)
+        no_charities_returned = len(charities) == 0
         dto.pageNum = dto.pageNum + 1
         has_next = len(get_organizations(dto)) > 0
-        return render(request, 'main/search.html',
-                      {'search': dto.search, 'charities': charities, 'pageNum': dto.pageNum - 1, 'hasNext': has_next,
-                       'filter_values': filter_values, 'applied_filters': self.applied_filters})
+        empty_search_string = self.__select_random_element(self.empty_search_strings)
+        context = {
+            'search': dto.search,
+            'charities': charities,
+            'pageNum': dto.pageNum - 1,
+            'hasNext': has_next,
+            'filter_values': filter_values,
+            'applied_filters': self.applied_filters,
+            'no_charities_returned': no_charities_returned,
+            "empty_search_string": empty_search_string
+        }
+        return context
+
+    def __select_random_element(self, l: List):
+        random.seed()
+        return l[random.randint(0, len(l) - 1)]
