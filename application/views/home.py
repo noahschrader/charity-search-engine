@@ -52,6 +52,5 @@ def lookup_recent_disasters(scope_in_days=90) -> List[str]:
 class Home(View):
 
     def get(self, request):
-        # top_disasters = lookup_recent_disasters()[0:10]
-        # return render(request, "main/home.html", {"items": top_disasters})
-        return render(request, "main/home.html")
+        top_disasters = lookup_recent_disasters()[0:10]
+        return render(request, "main/home.html", {"items": top_disasters})
